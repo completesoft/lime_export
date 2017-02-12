@@ -44,7 +44,13 @@ def release_session_key(m_url, key):
 
 
 def export_responses(m_url, key, sid):
-    payload = {"method": "export_responses", "params": (key, sid, "csv", "ru", "full"), "id": 1}
+    payload = {"method": "export_responses", "params": (key, sid, "csv", "ru", "all", "code", "short"), "id": 1}
+    j = json_request(m_url, payload)
+    return base64.b64decode(j["result"])
+
+
+def export_response(m_url, key, sid, id_from, id_to):
+    payload = {"method": "export_responses", "params": (key, sid, "csv", "ru", "all", "code", "short", id_from, id_to), "id": 1}
     j = json_request(m_url, payload)
     return base64.b64decode(j["result"])
 
@@ -168,6 +174,25 @@ def export_to_csv():
     f.close()
 
     release_session_key(url, session_key)
+
+
+def export1_to_csv(id_resp):
+    session_key = get_session_key(url)
+    questions_list = list_questions(url, session_key, "563799")
+    for question in questions_list:
+        qid = question["id"]
+        title = question["title"]
+        question_text = question["question"]
+        print(title + "    " + question_text)
+
+    my_csv = export_response(url, session_key, "563799", id_resp, id_resp).decode("utf-8")
+
+    f = open("export.csv", "w")
+    f.write(my_csv)
+    f.close()
+
+    release_session_key(url, session_key)
+
 
 export_to_csv()
 
